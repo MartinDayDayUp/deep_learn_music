@@ -32,7 +32,7 @@ train_dataset, test_dataset = random_split(small_dataset, [train_size, test_size
 doaModel = DOAmodel.DOAModel(angleGird.shape[0], 2).to(device)
 
 batch_size = 4096
-epochs = 1
+epochs = 5
 
 # 3. DataLoader 优化（num_workers 和 pin_memory 能加速 GPU 训练）
 trainLd = DataLoader(
