@@ -134,7 +134,7 @@ def TestMultiple(indices):
     plt.tight_layout() # 自动调整子图间距
     
     # ⚠️ 核心修正：必须先 savefig 再 show，否则保存出来的是一张白图！
-    img_path = '/kaggle/working/prj_doa/doa_music_2x4_Test.png'
+    img_path = '/kaggle/working/output/doa_music_2x4_Test.png'
     plt.savefig(img_path, dpi=300, bbox_inches='tight')
     print(f"\n✅ 2x4 结果图已保存至: {img_path}")
     
