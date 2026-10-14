@@ -4,6 +4,7 @@ import torch.optim as optim
 import DOADataSets, DOAmodel
 import numpy as np
 import torch
+import argparse
 
 import matplotlib.pyplot as plt
 
@@ -160,6 +161,17 @@ import os
 import matplotlib.pyplot as plt
 import pandas as pd
 import torch
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='DOA training')
+    parser.add_argument('--epochs', type=int, default=5,
+                        help='number of training epochs')
+    parser.add_argument('--batch_size', type=int, default=4096)
+    parser.add_argument('--lr', type=float, default=1e-4)
+    parser.add_argument('--out_dir', type=str, default='/kaggle/working/outputs')
+    parser.add_argument('--seed', type=int, default=42)
+    return parser.parse_args()
+
 
 if __name__ == '__main__':
     train_loss_list = []
