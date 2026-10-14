@@ -167,6 +167,8 @@ if __name__ == '__main__':
         print(f'Epoch: {ep+1} Training Loss: {train_loss:.6f}', flush=True)
         print(f'Epoch:{ep+1} Val Loss:{eval_loss:.6f}',flush=True)
 
+    torch.save(doaModel, './model_weights.pth')
+
     plt.figure()
     plt.plot(train_loss_list,label = 'train')
     plt.plot(val_loss_list,label = 'val')
