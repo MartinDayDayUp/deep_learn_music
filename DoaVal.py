@@ -29,7 +29,7 @@ test_size = len(small_dataset) - train_size
 train_dataset, test_dataset = random_split(small_dataset, [train_size, test_size])
 
 
-batch_size = 2048
+batch_size = 4096
 
 
 testLd = DataLoader(

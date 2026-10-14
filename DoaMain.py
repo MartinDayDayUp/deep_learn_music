@@ -32,8 +32,7 @@ train_dataset, test_dataset = random_split(small_dataset, [train_size, test_size
 # 2. 模型搬到 GPU
 doaModel = DOAmodel.DOAModel(angleGird.shape[0], 2).to(device)
 
-batch_size = 4096
-epochs = 5
+
 
 # 3. DataLoader 优化（num_workers 和 pin_memory 能加速 GPU 训练）
 trainLd = DataLoader(
@@ -177,6 +176,10 @@ if __name__ == '__main__':
     train_loss_list = []
     val_loss_list = []
 
+    args = parse_args()
+    print(args)
+    batch_size = args.batch_size
+    epochs = args.epochs
     # 输出目录
     out_dir = '/kaggle/working/outputs'
     os.makedirs(out_dir, exist_ok=True)
