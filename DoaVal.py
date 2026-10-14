@@ -50,7 +50,7 @@ def TestMultiple(indices):
     fig, axes = plt.subplots(2, 4, figsize=(24, 10))
     axes = axes.flatten() # 将 2x4 的二维数组展平为 1维 (长度 8)，方便索引
     
-    doaModel = torch.load('doa_model.pth')
+    doaModel = torch.load('doa_model.pth',weights_only=False)
     doaModel = doaModel.to(device)
     
     # 2. 遍历传入的 8 个索引
@@ -142,7 +142,7 @@ def TestMultiple(indices):
 
 
 def getMaxAcc():
-    doaModel = torch.load('doa_model.pth')
+    doaModel = torch.load('doa_model.pth',weights_only=False)
     doaModel = doaModel.to(device)
     ths = np.linspace(0,1,200)
     doaModel.eval()
@@ -187,3 +187,4 @@ def getMaxAcc():
 
     return best_th,best_acc
 getMaxAcc()
+TestMultiple([1,2,3,4,5,6,7,8])
