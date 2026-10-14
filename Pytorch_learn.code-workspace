@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../../11.深度学习/手势识别/MVRADAR-mutliview_dev2"
+		}
+	],
+    "settings": {
+        "python-envs.defaultEnvManager": "ms-python.python:conda",
+        "python-envs.defaultPackageManager": "ms-python.python:conda"
+    }
+}

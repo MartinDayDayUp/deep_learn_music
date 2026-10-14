@@ -32,7 +32,7 @@ train_dataset, test_dataset = random_split(small_dataset, [train_size, test_size
 doaModel = DOAmodel.DOAModel(angleGird.shape[0], 2).to(device)
 
 batch_size = 4096
-epochs = 2
+epochs = 1
 
 # 3. DataLoader 优化（num_workers 和 pin_memory 能加速 GPU 训练）
 trainLd = DataLoader(
@@ -156,20 +156,52 @@ def val_one_epoch(epoch):
 
 
 
+import os
+import matplotlib.pyplot as plt
+import pandas as pd
+import torch
+
 if __name__ == '__main__':
-    train_loss_list =[]
+    train_loss_list = []
     val_loss_list = []
+
+    # 输出目录
+    out_dir = '/kaggle/working/outputs'
+    os.makedirs(out_dir, exist_ok=True)
+
+    # 训练循环
     for ep in range(epochs):
         train_loss = train_one_epoch(ep)
         eval_loss = val_one_epoch(ep)
         train_loss_list.append(train_loss)
         val_loss_list.append(eval_loss)
         print(f'Epoch: {ep+1} Training Loss: {train_loss:.6f}', flush=True)
-        print(f'Epoch:{ep+1} Val Loss:{eval_loss:.6f}',flush=True)
+        print(f'Epoch: {ep+1} Val Loss: {eval_loss:.6f}', flush=True)
 
-    torch.save(doaModel, './doa_model.pth')
+    # 1) 保存模型
+    torch.save(doaModel, os.path.join(out_dir, 'doa_model.pth'))
 
+    # 2) 用 pandas 保存 loss 到 csv
+    df = pd.DataFrame({
+        'epoch': range(1, len(train_loss_list) + 1),
+        'train_loss': train_loss_list,
+        'val_loss': val_loss_list,
+    })
+    csv_path = os.path.join(out_dir, 'loss.csv')
+    df.to_csv(csv_path, index=False, float_format='%.6f')
+    print(f'saved: {csv_path}')
+    print(df)
+
+    # 3) 画图并保存图片
     plt.figure()
-    plt.plot(train_loss_list,label = 'train')
-    plt.plot(val_loss_list,label = 'val')
+    plt.plot(df['epoch'], df['train_loss'], label='train')
+    plt.plot(df['epoch'], df['val_loss'], label='val')
+    plt.xlabel('epoch')
+    plt.ylabel('loss')
+    plt.legend()
+    plt.grid(True)
+
+    fig_path = os.path.join(out_dir, 'loss_curve.png')
+    plt.savefig(fig_path, dpi=150, bbox_inches='tight')
     plt.show()
+    print(f'saved: {fig_path}')
