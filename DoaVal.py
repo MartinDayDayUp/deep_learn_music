@@ -43,7 +43,7 @@ testLd = DataLoader(
 
 
 
-def TestMultiple(indices):
+def TestMultiple(indices,th):
     """
     同时测试并绘制多个样本
     indices: 列表，例如 [0, 1, 2, 3, 4, 5, 6, 7]
@@ -73,7 +73,7 @@ def TestMultiple(indices):
 
         # 真实标签与预测标签索引
         true_idx = torch.nonzero(label > 0).flatten()
-        pred_idx = torch.where(prob[0] > 0.65)[0]
+        pred_idx = torch.where(prob[0] > th)[0]
 
         # 转换为 numpy 用于绘图
         prob_np = prob[0].detach().cpu().numpy()
@@ -85,7 +85,7 @@ def TestMultiple(indices):
         ax.plot(angleGird, prob_np, color='blue', label='Pred Prob')
 
         # 画阈值线
-        ax.axhline(y=0.65, color='gray', linestyle='--', label='Threshold')
+        ax.axhline(y=th, color='gray', linestyle='--', label='Threshold')
 
         # 真实标签垂直线
         if len(true_idx_np) > 0:
@@ -98,7 +98,7 @@ def TestMultiple(indices):
         if len(pred_idx_np) > 0:
             ax.scatter(
                 angleGird[pred_idx_np], prob_np[pred_idx_np],
-                color='green', zorder=5, label='Pred > 0.65'
+                color='green', zorder=5, label=f'Pred > {th}'
             )
 
         # 标注真实标签角度值（红色）
@@ -185,8 +185,8 @@ def getMaxAcc():
     plt.show()
     print(f'best th{best_th} best acc{best_acc}')
 
-
-
     return best_th,best_acc
 getMaxAcc()
 TestMultiple([1,2,3,4,5,6,7,8])
+testRandIdx = np.random.randint(0,1000,8)
+TestMultiple(testRandIdx)

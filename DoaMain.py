@@ -161,8 +161,26 @@ def val_one_epoch(epoch):
 
 
 
+class EarlyStopping:
+    def __init__(self, patience=20, min_delta=1e-5):
+        self.patience = patience
+        self.min_delta = min_delta
+        self.best_val = float('inf')
+        self.no_improve = 0
+        self.best_ep = 0
 
+    def step(self, val_loss, ep):
+        """每个 epoch 验证后调用。返回 True 表示该停了。"""
+        if val_loss < self.best_val - self.min_delta:
+            self.best_val = val_loss
+            self.no_improve = 0
+            self.best_ep = ep
+        else:
+            self.no_improve += 1
 
+        print(f"  [best val {self.best_val:.6f} @ epoch {self.best_ep+1}]  "
+              f"无改善 {self.no_improve}/{self.patience}", flush=True)
+        return self.no_improve >= self.patience
 
 
 
@@ -176,7 +194,7 @@ if __name__ == '__main__':
     train_loss_list = []
     val_loss_list = []
 
-
+    es = EarlyStopping(patience=20, min_delta=1e-5)   # ← 建一个对象
     # 输出目录
     os.makedirs(out_dir, exist_ok=True)
 
@@ -188,6 +206,9 @@ if __name__ == '__main__':
         val_loss_list.append(eval_loss)
         print(f'Epoch: {ep+1} Training Loss: {train_loss:.6f}', flush=True)
         print(f'Epoch: {ep+1} Val Loss: {eval_loss:.6f}', flush=True)
+        if es.step(eval_loss, ep):                    # ← 判断是否停止
+            print(f"=> Early stopping at epoch {ep+1}, best was epoch {es.best_ep+1}", flush=True)
+            break
 
     # 1) 保存模型
     torch.save(doaModel, os.path.join(out_dir, 'doa_model.pth'))
