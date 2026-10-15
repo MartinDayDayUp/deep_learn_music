@@ -186,7 +186,7 @@ def getMaxAcc():
     print(f'best th{best_th} best acc{best_acc}')
 
     return best_th,best_acc
-getMaxAcc()
-TestMultiple([1,2,3,4,5,6,7,8])
+best_th = getMaxAcc()
+TestMultiple([1,2,3,4,5,6,7,8],best_th)
 testRandIdx = np.random.randint(0,1000,8)
-TestMultiple(testRandIdx)
+TestMultiple(testRandIdx,best_th)
