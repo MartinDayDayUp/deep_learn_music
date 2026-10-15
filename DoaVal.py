@@ -5,7 +5,6 @@ import torch.optim as optim
 import DOADataSets
 import numpy as np
 import torch
-import config
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score, hamming_loss, f1_score
 
