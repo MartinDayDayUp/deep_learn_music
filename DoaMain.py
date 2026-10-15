@@ -59,7 +59,7 @@ valLd = DataLoader(
 
 C = len(angleGird)
 pos_weight = torch.full((C,), 11.0)
-pos_weight.to(device)
+pos_weight = pos_weight.to(device)
 criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
 # criterion = nn.BCEWithLogitsLoss()
 optimizer = optim.Adam(doaModel.parameters(), lr=lr)
