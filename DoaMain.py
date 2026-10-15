@@ -38,89 +38,30 @@ print(f"total: {len(doaDataSet)}, using: {len(small_dataset)}", flush=True)
 # 再按 8:2 划分
 train_size = int(0.8 * len(small_dataset))
 test_size = len(small_dataset) - train_size
-train_dataset, test_dataset = random_split(small_dataset, [train_size, test_size])
+train_dataset, val_dataset = random_split(small_dataset, [train_size, test_size])
 
 # 2. 模型搬到 GPU
 doaModel = DOAmodel.DOAModel(angleGird.shape[0], 2).to(device)
 
-
+if torch.cuda.device_count() > 1:
+    print(f"使用 {torch.cuda.device_count()} 张 GPU 训练")
+    doaModel = nn.DataParallel(doaModel)
 
 # 3. DataLoader 优化（num_workers 和 pin_memory 能加速 GPU 训练）
 trainLd = DataLoader(
     train_dataset, batch_size=batch_size, shuffle=True, 
     num_workers=2, pin_memory=True
 )
-testLd = DataLoader(
-    test_dataset, batch_size=batch_size, shuffle=False, 
+valLd = DataLoader(
+    val_dataset, batch_size=batch_size, shuffle=False, 
     num_workers=2, pin_memory=True
 )
 
-criterion = nn.BCEWithLogitsLoss()
+C = len(angleGird)
+pos_weight = torch.full((C,), 11.0)
+criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+# criterion = nn.BCEWithLogitsLoss()
 optimizer = optim.Adam(doaModel.parameters(), lr=lr)
-
-
-
-# def Train():
-#     doaModel.train()
-#     for ep in range(epoch):
-#         train_loss = 0.0
-
-#         for feas, labels in trainLd:
-#             # 4. 数据搬到 GPU（non_blocking 配合 pin_memory 加速传输）
-#             feas = feas.to(device, non_blocking=True)
-#             labels = labels.to(device, non_blocking=True)
-
-#             logits = doaModel(feas)
-#             loss = criterion(logits, labels)
-
-#             optimizer.zero_grad()  # 清空梯度
-#             loss.backward()        # 反向传播
-#             optimizer.step()       # 更新参数
-
-#             train_loss += loss.item() * len(feas)
-
-#         train_loss = train_loss / len(trainLd.dataset)
-#         print(f'Epoch: {ep+1} Training Loss: {train_loss:.6f}', flush=True)
-
-# import matplotlib.pyplot as plt
-# def Test(isOneTest):
-#     if isOneTest:
-#         doaModel.eval()
-
-#         # 1. 取测试集里的第 5 个样本
-#         feas, label = test_dataset[5]
-
-#         # 2. 加 batch 维度，搬到 GPU
-#         feas = feas.unsqueeze(0).to(device)      # (1, 2, 8, 8)
-
-#         # 3. 前向 + Sigmoid 得到概率
-#         with torch.no_grad():
-#             logits = doaModel(feas)              # (1, 181)
-#             prob = torch.sigmoid(logits)         # (1, 181)
-
-#         # 4. 真实标签中 > 0 的索引
-#         true_idx = torch.nonzero(label > 0).flatten()       # (K,)
-#         plt.plot(angleGird,prob)
-#         # 5. 预测概率 > 0.65 的索引
-#         pred_idx = torch.where(prob[0] > 0.65)[0]           # (M,)
-
-#         # 6. 打印
-#         print(f"真实标签 > 0 的索引 ({len(true_idx)} 个):")
-#         print(true_idx.tolist())
-
-#         print(f"\n预测概率 > 0.65 的索引 ({len(pred_idx)} 个):")
-#         print(pred_idx.tolist())
-
-#         # 7. 可选：打印对应的概率值
-#         print(f"\n预测索引对应的概率值:")
-#         for idx in pred_idx.tolist():
-#             print(f"  class {idx}: prob = {prob[0, idx].item():.4f}")
-
-#     else:
-#         doaModel.eval()
-#         for ep in range(epoch):
-
-
 
 
 
@@ -147,7 +88,7 @@ def val_one_epoch(epoch):
     doaModel.eval()
     eval_loss = 0
     with torch.no_grad():
-        for feas,labels in testLd:
+        for feas,labels in valLd:
             feas = feas.to(device, non_blocking=True)
             labels = labels.to(device, non_blocking=True)
             logits = doaModel(feas)
@@ -155,7 +96,7 @@ def val_one_epoch(epoch):
             loss = criterion(logits,labels)
 
             eval_loss += loss.item() * len(feas)
-        eval_loss = eval_loss / len(testLd.dataset)
+        eval_loss = eval_loss / len(valLd.dataset)
     return eval_loss
 
 
@@ -211,7 +152,12 @@ if __name__ == '__main__':
             break
 
     # 1) 保存模型
-    torch.save(doaModel, os.path.join(out_dir, 'doa_model.pth'))
+    weight_path = os.path.join(out_dir, 'model_weight.pth')
+    if torch.cuda.device_count() > 1:
+        # 重要：使用 model.module.state_dict() 来去除 DataParallel 添加的 "module." 前缀
+        torch.save(doaModel.module.state_dict(), weight_path)
+    else:
+        torch.save(doaModel.state_dict(), weight_path)
 
     # 2) 用 pandas 保存 loss 到 csv
     df = pd.DataFrame({

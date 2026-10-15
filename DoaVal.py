@@ -3,6 +3,7 @@ from torch.utils.data import DataLoader, random_split, Subset
 import torch.nn as nn
 import torch.optim as optim
 import DOADataSets
+import DOAmodel
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
@@ -52,8 +53,7 @@ def TestMultiple(indices,th):
     fig, axes = plt.subplots(2, 4, figsize=(24, 10))
     axes = axes.flatten() # 将 2x4 的二维数组展平为 1维 (长度 8)，方便索引
     
-    doaModel = torch.load('doa_model.pth',weights_only=False)
-    doaModel = doaModel.to(device)
+
     
     # 2. 遍历传入的 8 个索引
     for i, idx in enumerate(indices):
@@ -144,8 +144,7 @@ def TestMultiple(indices,th):
 
 
 def getMaxAcc():
-    doaModel = torch.load('doa_model.pth',weights_only=False)
-    doaModel = doaModel.to(device)
+
     ths = np.linspace(0,1,200)
     doaModel.eval()
     all_probs = []
@@ -186,6 +185,11 @@ def getMaxAcc():
     print(f'best th{best_th} best acc{best_acc}')
 
     return best_th,best_acc
+
+doaModel = DOAmodel.DOAModel(angleGird.shape[0], 2)
+doaModel.load_state_dict(torch.load('/kaggle/working/outputs/model_weight.pth'))
+doaModel = doaModel.to(device)
+
 best_th,_ = getMaxAcc()
 TestMultiple([1,2,3,4,5,6,7,8],best_th)
 testRandIdx = np.random.randint(0,1000,8)
