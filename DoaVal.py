@@ -9,11 +9,7 @@ import config
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score, hamming_loss, f1_score
 
-args = config.get_options()
-batch_size = args.batch_size
-epochs = args.epochs
-lr = args.lr
-out_dir = args.out_dir
+batch_size = 4096
 
 
 # 1. 自动选择设备
