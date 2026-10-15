@@ -136,7 +136,7 @@ if __name__ == '__main__':
     train_loss_list = []
     val_loss_list = []
 
-    es = EarlyStopping(patience=20, min_delta=1e-5)   # ← 建一个对象
+    es = EarlyStopping(patience=2000, min_delta=1e-5)   # ← 建一个对象
     # 输出目录
     os.makedirs(out_dir, exist_ok=True)
 
