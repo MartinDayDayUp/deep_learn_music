@@ -5,9 +5,19 @@ import DOADataSets, DOAmodel
 import numpy as np
 import torch
 import argparse
-
 import matplotlib.pyplot as plt
-batch_size = 4096
+import config
+import os
+import pandas as pd
+
+args = config.get_options()
+
+
+batch_size = args.batch_size
+epochs = args.epochs
+lr = args.lr
+out_dir = args.out_dir
+
 
 # 1. 自动选择设备
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -46,7 +56,7 @@ testLd = DataLoader(
 )
 
 criterion = nn.BCEWithLogitsLoss()
-optimizer = optim.Adam(doaModel.parameters(), lr=1e-4)
+optimizer = optim.Adam(doaModel.parameters(), lr=lr)
 
 
 
@@ -157,32 +167,17 @@ def val_one_epoch(epoch):
 
 
 
-import os
-import matplotlib.pyplot as plt
-import pandas as pd
-import torch
 
-def parse_args():
-    parser = argparse.ArgumentParser(description='DOA training')
-    parser.add_argument('--epochs', type=int, default=5,
-                        help='number of training epochs')
-    parser.add_argument('--batch_size', type=int, default=4096)
-    parser.add_argument('--lr', type=float, default=1e-4)
-    parser.add_argument('--out_dir', type=str, default='/kaggle/working/outputs')
-    parser.add_argument('--seed', type=int, default=42)
-    return parser.parse_args()
+
+
 
 
 if __name__ == '__main__':
     train_loss_list = []
     val_loss_list = []
 
-    args = parse_args()
-    print(args)
 
-    epochs = args.epochs
     # 输出目录
-    out_dir = '/kaggle/working/outputs'
     os.makedirs(out_dir, exist_ok=True)
 
     # 训练循环

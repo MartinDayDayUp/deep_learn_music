@@ -5,8 +5,17 @@ import torch.optim as optim
 import DOADataSets
 import numpy as np
 import torch
-
+import config
 import matplotlib.pyplot as plt
+from sklearn.metrics import accuracy_score, hamming_loss, f1_score
+
+args = config.get_options()
+batch_size = args.batch_size
+epochs = args.epochs
+lr = args.lr
+out_dir = args.out_dir
+
+
 # 1. 自动选择设备
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"using device: {device}", flush=True)
@@ -29,7 +38,6 @@ test_size = len(small_dataset) - train_size
 train_dataset, test_dataset = random_split(small_dataset, [train_size, test_size])
 
 
-batch_size = 4096
 
 
 testLd = DataLoader(
@@ -39,7 +47,6 @@ testLd = DataLoader(
 
 
 
-from sklearn.metrics import accuracy_score, hamming_loss, f1_score
 
 def TestMultiple(indices):
     """
@@ -134,7 +141,7 @@ def TestMultiple(indices):
     plt.tight_layout() # 自动调整子图间距
     
     # ⚠️ 核心修正：必须先 savefig 再 show，否则保存出来的是一张白图！
-    img_path = '/kaggle/working/output/doa_music_2x4_Test.png'
+    img_path = '/kaggle/working/outputs/doa_music_2x4_Test.png'
     plt.savefig(img_path, dpi=300, bbox_inches='tight')
     print(f"\n✅ 2x4 结果图已保存至: {img_path}")
     
